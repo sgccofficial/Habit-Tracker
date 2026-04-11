@@ -1,9 +1,12 @@
 const CACHE_NAME = "habit-app-v1";
 
 const urlsToCache = [
+  "./",
   "index.html",
   "journal.html",
-  "timer.html"
+  "timer.html",
+  "manifest.json",
+  "icon.png"
 ];
 
 // Install
