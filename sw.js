@@ -1,4 +1,4 @@
-const CACHE_NAME = "habit-app-v0";
+const CACHE_NAME = "habit-app-v1";
 
 const urlsToCache = [
   "./",
