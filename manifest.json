@@ -1,20 +1,46 @@
 {
   "name": "HabitFlow",
   "short_name": "HabFlow",
+  "description": "Track habits, maintain streaks, journal your progress, and stay consistent every day.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#6366f1",
+  "orientation": "portrait",
+
   "icons": [
     {
-      "src": "image-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "image-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+
+  "categories": ["productivity", "lifestyle"],
+
+  "shortcuts": [
+    {
+      "name": "Add Habit",
+      "url": "./index.html"
+    },
+    {
+      "name": "Open Journal",
+      "url": "./journal.html"
+    },
+    {
+      "name": "Start Timer",
+      "url": "./timer.html"
     }
   ]
 }
