@@ -35,8 +35,13 @@ self.addEventListener("activate", event => {
 // FETCH (network first, fallback to cache)
 self.addEventListener("fetch", event => {
   event.respondWith(
-    fetch(event.request)
-      .then(res => res)
-      .catch(() => caches.match(event.request))
+    caches.match(event.request).then(cached => {
+      return cached || fetch(event.request).then(res => {
+        return caches.open("habitflow-runtime").then(cache => {
+          cache.put(event.request, res.clone());
+          return res;
+        });
+      }).catch(() => caches.match("offline.html"));
+    })
   );
 });
