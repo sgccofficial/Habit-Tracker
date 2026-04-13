@@ -47,6 +47,9 @@ body.dark .entry{background:#151a2f;}
 .content{
   margin-bottom:14px;
   line-height:1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 /* META */
@@ -128,6 +131,8 @@ body.dark .box{background:#1c223a;}
   border-radius:14px;
   background:#e0e3ef;
   margin-top:8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 body.dark .editor{
   background:#2a3355;
@@ -404,13 +409,19 @@ function rebindEditorCheckboxes(){
   });
 }
 
-/* INPUT */
-document.getElementById("editor").addEventListener("beforeinput",function(e){
-  if(e.data && e.inputType === "insertText"){
-    e.preventDefault();
-    document.execCommand("insertHTML",false,
-      `<span style="color:${currentColor}">${e.data}</span>`
-    );
+/* INPUT FIX (stable typing) */
+document.getElementById("editor").addEventListener("input", function(){
+  const selection = window.getSelection();
+  if(!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+  let node = range.startContainer;
+
+  // move up to element if text node
+  if(node.nodeType === 3) node = node.parentElement;
+
+  if(node){
+    node.style.color = currentColor;
   }
 });
 
