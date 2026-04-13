@@ -392,10 +392,36 @@ function loadHabits(){
 }
 
 /* COLOR */
-function setColor(el,color){
+function setColor(el, color){
   document.querySelectorAll(".color").forEach(c=>c.classList.remove("active"));
   el.classList.add("active");
-  currentColor=color;
+
+  const selection = window.getSelection();
+
+  // ✅ If user selected text → color only that
+  if(selection.rangeCount){
+    const range = selection.getRangeAt(0);
+
+    if(!range.collapsed){
+      const span = document.createElement("span");
+      span.style.color = color;
+
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+
+      // move cursor after colored text
+      selection.removeAllRanges();
+      const newRange = document.createRange();
+      newRange.setStartAfter(span);
+      newRange.collapse(true);
+      selection.addRange(newRange);
+
+      return;
+    }
+  }
+
+  // fallback (no selection)
+  currentColor = color;
 }
 function rebindEditorCheckboxes(){
   const editor = document.getElementById("editor");
