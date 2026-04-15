@@ -706,8 +706,9 @@ const messaging = getMessaging(app);
 
 async function initPush() {
   try {
-    const swReg = await navigator.serviceWorker.register("firebase-messaging-sw.js");
-
+    const swReg = await navigator.serviceWorker.register("./firebase-messaging-sw.js", {
+  scope: "./"
+    });
     const permission = await Notification.requestPermission();
 
     if (permission === "granted") {
