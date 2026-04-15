@@ -1,21 +1,3 @@
-// 🔥 FIREBASE (must be at top)
-importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
-
-firebase.initializeApp({
-  messagingSenderId: "132980995414"
-});
-
-const messaging = firebase.messaging();
-
-messaging.onBackgroundMessage(function(payload) {
-  self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body
-  });
-});
-
-
-// 🔥 PWA CACHE
 const CACHE_NAME = "habitflow-v0";
 
 const urlsToCache = [
@@ -28,7 +10,6 @@ const urlsToCache = [
   "icon-512.png"
 ];
 
-// INSTALL
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
@@ -36,7 +17,6 @@ self.addEventListener("install", event => {
   );
 });
 
-// ACTIVATE
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -52,7 +32,6 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// FETCH
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(cached => {
