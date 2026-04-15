@@ -9,6 +9,7 @@
   "theme_color": "#6366f1",
   "orientation": "portrait",
   "categories": ["productivity", "lifestyle"],
+  "gcm_sender_id": "103953800507",
 
   "icons": [
     {
