@@ -706,7 +706,7 @@ const messaging = getMessaging(app);
 
 async function initPush() {
   try {
-    const swReg = await navigator.serviceWorker.register("/HabitFlow/firebase-messaging-sw.js");
+    const swReg = await navigator.serviceWorker.register("firebase-messaging-sw.js");
 
     const permission = await Notification.requestPermission();
 
