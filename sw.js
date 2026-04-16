@@ -46,3 +46,20 @@ self.addEventListener("fetch", event => {
     })
   );
 });
+self.addEventListener("push", function(event) {
+  console.log("RAW PUSH:", event);
+
+  if (!event.data) return;
+
+  const data = event.data.json();
+
+  const title = data.notification?.title || "HabitFlow";
+  const options = {
+    body: data.notification?.body || "New message",
+    icon: "icon-192.png"
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
