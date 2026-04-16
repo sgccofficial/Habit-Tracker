@@ -1,4 +1,4 @@
-const CACHE_NAME = "habitflow-v0";
+const CACHE_NAME = "habitflow-v2";
 
 const urlsToCache = [
   "./",
@@ -10,26 +10,7 @@ const urlsToCache = [
   "image-512.png"
 ];
 
-importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
-
-firebase.initializeApp({
-  messagingSenderId: "132980995414"
-});
-
-const messaging = firebase.messaging();
-
-// Background handler (Firebase style)
-messaging.onBackgroundMessage(function(payload) {
-  const title = payload.notification?.title || "HabitFlow";
-  const options = {
-    body: payload.notification?.body || "New update",
-    icon: "image-192.png"
-  };
-
-  self.registration.showNotification(title, options);
-});
-
+// INSTALL
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
@@ -37,6 +18,7 @@ self.addEventListener("install", event => {
   );
 });
 
+// ACTIVATE
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -52,6 +34,7 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
+// FETCH
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(cached => {
@@ -66,9 +49,9 @@ self.addEventListener("fetch", event => {
     })
   );
 });
-self.addEventListener("push", function(event) {
-  console.log("RAW PUSH:", event);
 
+// 🔔 PUSH (only this is needed)
+self.addEventListener("push", event => {
   if (!event.data) return;
 
   const data = event.data.json();
@@ -76,7 +59,7 @@ self.addEventListener("push", function(event) {
   const title = data.notification?.title || "HabitFlow";
   const options = {
     body: data.notification?.body || "New message",
-    icon: "icon-192.png"
+    icon: "image-192.png"
   };
 
   event.waitUntil(
