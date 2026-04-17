@@ -691,7 +691,7 @@ if ("serviceWorker" in navigator) {
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCwVUAnFNoEk5HUF2o_qf2hj83V4MhNcfg",
@@ -703,7 +703,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
-  onMessage(messaging, (payload) => {
+
+// ✅ Foreground messages
+onMessage(messaging, (payload) => {
   console.log("Foreground message:", payload);
 
   if (Notification.permission === "granted") {
@@ -715,15 +717,6 @@ const messaging = getMessaging(app);
       }
     );
   }
-});
-  import { onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
-
-onMessage(messaging, (payload) => {
-  console.log("Foreground message:", payload);
-
-  new Notification(payload.notification.title, {
-    body: payload.notification.body
-  });
 });
 
 async function initPush() {
