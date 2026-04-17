@@ -1,19 +1,13 @@
 import express from "express";
 import admin from "firebase-admin";
+import cors from "cors";
 
-const express = require("express");
-const cors = require("cors");
 const app = express();
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST");
-  next();
-});
+
 app.use(cors());
 app.use(express.json());
 
-// Load from ENV (not file)
+// Load from ENV
 const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
 
 admin.initializeApp({
@@ -32,10 +26,7 @@ app.post("/send", async (req, res) => {
   try {
     await admin.messaging().send({
       token,
-      notification: {
-        title,
-        body
-      }
+      notification: { title, body }
     });
 
     res.send("Notification sent");
@@ -46,4 +37,4 @@ app.post("/send", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server started"));
+app.listen(PORT, () => console.log("Server started on", PORT));
