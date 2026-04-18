@@ -31,9 +31,9 @@ app.post("/send", async (req, res) => {
 
     res.send("Notification sent");
   } catch (err) {
-  console.error("FCM ERROR FULL:", err);
-  res.status(500).send(err.message);
-}
+    console.error("FCM ERROR:", err);
+    res.status(500).send(err.message);
+  }
 });
 
 const PORT = process.env.PORT || 3000;
