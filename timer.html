@@ -374,7 +374,22 @@ button:active{
 
 </div>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "hab-flow.firebaseapp.com",
+  projectId: "hab-flow",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
+let fcmToken = null;
 /* THEME */
 function toggleDark(){
   document.body.classList.toggle("dark");
@@ -489,9 +504,10 @@ if (delay > 0) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          title: "Time’s Up ⏰",
-          body: "You should be done by now 😉"
-        })
+  token: fcmToken,
+  title: "Time’s Up ⏰",
+  body: "You should be done by now 😉"
+})
       });
     }
   }, delay);
@@ -562,9 +578,10 @@ if (delay > 0) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          title: "Time’s Up ⏰",
-          body: "You should be done by now 😉"
-        })
+  token: fcmToken,
+  title: "Time’s Up ⏰",
+  body: "You should be done by now 😉"
+})
       });
     }
   }, delay);
