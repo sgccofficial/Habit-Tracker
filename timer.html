@@ -409,6 +409,15 @@ const registration = await navigator.serviceWorker.register("sw.js");
 }
 
 initFCM();
+  let taskSelect, minInput, secInput, tmDisplay, ring;
+
+document.addEventListener("DOMContentLoaded", () => {
+  taskSelect = document.getElementById("taskSelect");
+  minInput = document.getElementById("minInput");
+  secInput = document.getElementById("secInput");
+  tmDisplay = document.getElementById("tmDisplay");
+  ring = document.getElementById("ring");
+});
 /* THEME */
 function toggleDark(){
   document.body.classList.toggle("dark");
@@ -505,11 +514,17 @@ function startTM(){
   notify("Timer Started !!", "Your timer is running...");
 
 if (window.fcmToken) {
+
+  const taskEl = document.getElementById("taskSelect");
+  const taskName = taskEl
+    ? taskEl.options[taskEl.selectedIndex].text
+    : "Session";
+
   addDoc(collection(db, "timers"), {
     token: window.fcmToken,
     endTime: endTime,
     sent: false,
-    task: taskSelect.options[taskSelect.selectedIndex].text || "Session"
+    task: taskName
   }).catch(err => console.log("Firestore error:", err));
   }
   tmi = setInterval(updateFromTime, 250);
@@ -657,7 +672,10 @@ if(savedEnd){
 
 /* FINISH */
 function finish(){
-  let task = taskSelect.options[taskSelect.selectedIndex].text || "Session";
+  const taskEl = document.getElementById("taskSelect");
+const task = taskEl
+  ? taskEl.options[taskEl.selectedIndex].text
+  : "Session";
   finishText.innerText = task + " Completed ?";
   finishModal.style.display = "flex";
   vibrate();
@@ -671,7 +689,8 @@ function markDone(){
   stopVibrate();
   finishModal.style.display="none";
 
-  let index = taskSelect.value;
+  const taskEl = document.getElementById("taskSelect");
+let index = taskEl ? taskEl.value : "";
 
   if(index !== ""){
     let habits = JSON.parse(localStorage.getItem("habits")) || [];
