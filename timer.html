@@ -389,17 +389,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-let fcmToken = null;
+window.fcmToken = null;
   async function initFCM() {
   try {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return;
 
-    fcmToken = await getToken(messaging, {
-      vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK2O8CpDN74Z1PdXkVGuxNsHAuku8zZNo"
-    });
-
-    console.log("FCM TOKEN:", fcmToken);
+    window.fcmToken = await getToken(messaging, {
+  vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK2O8CpDN74Z1PdXkVGuxNsHAuku8zZNo"
+});
+    console.log("FCM TOKEN:", window.fcmToken);
 
   } catch (err) {
     console.log("FCM error:", err);
@@ -514,7 +513,7 @@ const delay = endTime - Date.now();
 // 🔥 Only schedule if valid
 if (delay > 0) {
   pushTimeout = setTimeout(() => {
-  if (!fcmToken) {
+  if (!window.fcmToken) {
   alert("FCM not ready. Wait a moment and try again.");
   return;
 }
@@ -525,7 +524,7 @@ if (delay > 0) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-  token: fcmToken,
+  token: window.fcmToken,
   title: "Time’s Up ⏰",
   body: "You should be done by now 😉"
 })
@@ -592,7 +591,7 @@ const delay = endTime - Date.now();
 
 if (delay > 0) {
   pushTimeout = setTimeout(() => {
-    if (!fcmToken) {
+    if (!window.fcmToken) {
   console.log("Token not ready yet");
   return;
 }
@@ -603,7 +602,7 @@ if (delay > 0) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-  token: fcmToken,
+  token: window.fcmToken,
   title: "Time’s Up ⏰",
   body: "You should be done by now 😉"
 })
