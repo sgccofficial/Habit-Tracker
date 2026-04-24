@@ -377,6 +377,7 @@ button:active{
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+  import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCwVUAnFNoEk5HUF2o_qf2hj83V4MhNcfg",
@@ -388,6 +389,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
+  const db = getFirestore(app);
 
 window.fcmToken = null;
   async function initFCM() {
@@ -482,18 +484,14 @@ function updateSW(){
 let total=0, left=0, tmi=null;
 const C=628;
 let endTime = null;
-  let pushTimeout = null;
 
 function startTM(){
-  if ("Notification" in window && Notification.permission !== "granted") {
-  Notification.requestPermission();
-}
+
   if(tmi) return;
 
   let m = parseInt(minInput.value) || 0;
   let s = parseInt(secInput.value) || 0;
 
-  // First start
   if(!endTime){
     total = m*60 + s;
     if(total === 0) return;
@@ -503,40 +501,21 @@ function startTM(){
     localStorage.setItem("timerEnd", endTime);
     localStorage.setItem("timerTotal", total);
   }
+
   notify("Timer Started !!", "Your timer is running...");
 
-// 🔥 Prevent duplicate scheduling
-if (pushTimeout) clearTimeout(pushTimeout);
-
-// 🔥 Accurate delay
-const delay = endTime - Date.now();
-
-// 🔥 Only schedule if valid
-if (delay > 0) {
-  pushTimeout = setTimeout(() => {
-  if (!window.fcmToken) {
-  alert("FCM not ready. Wait a moment and try again.");
-  return;
-}
-    if (document.visibilityState !== "visible") {
-      fetch("https://habitflow-server-2jca.onrender.com/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-  token: window.fcmToken,
-  title: "Time’s Up ⏰",
-  body: "You should be done by now 😉"
-})
-      });
-    }
-  }, delay);
-}
-tmi = setInterval(updateFromTime, 250);
+if (window.fcmToken) {
+  addDoc(collection(db, "timers"), {
+    token: window.fcmToken,
+    endTime: endTime,
+    sent: false,
+    task: taskSelect.options[taskSelect.selectedIndex].text || "Session"
+  }).catch(err => console.log("Firestore error:", err));
+  }
+  tmi = setInterval(updateFromTime, 250);
 updateFromTime();
-}
-
+  }
+  
 function updateFromTime(){
   let end = parseInt(localStorage.getItem("timerEnd"));
 
@@ -580,37 +559,10 @@ function pauseTM(){
   clearInterval(tmi);
   tmi = null;
 
-  // keep remaining time
   let remaining = left;
   endTime = Date.now() + remaining * 1000;
 
   localStorage.setItem("timerEnd", endTime);
-  // 🔥 reschedule push after pause
-if (pushTimeout) clearTimeout(pushTimeout);
-
-const delay = endTime - Date.now();
-
-if (delay > 0) {
-  pushTimeout = setTimeout(() => {
-    if (!window.fcmToken) {
-  console.log("Token not ready yet");
-  return;
-}
-    if (document.visibilityState !== "visible") {
-      fetch("https://habitflow-server-2jca.onrender.com/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-  token: window.fcmToken,
-  title: "Time’s Up ⏰",
-  body: "You should be done by now 😉"
-})
-      });
-    }
-  }, delay);
-}
 }
 
 function resetTM(){
@@ -626,10 +578,6 @@ function resetTM(){
 
   tmDisplay.innerText = "00:00";
   ring.style.strokeDashoffset = 0;
-  if (pushTimeout) {
-  clearTimeout(pushTimeout);
-  pushTimeout = null;
-  }
 }
 
 /* 🔥 VIBRATION FIXED: 3 TIMES */
@@ -717,10 +665,6 @@ function finish(){
   if (document.visibilityState === "visible") {
     notify("Time’s Up ⏰", task + " should be completed by now 😉");
   }
-  if (pushTimeout) {
-  clearTimeout(pushTimeout);
-  pushTimeout = null;
-}
 }
 
 function markDone(){
