@@ -335,7 +335,7 @@ button:active{
     </div>
 
     <div class="controls">
-      <button onclick="startTM()">Start</button>
+      <button onclick="startWithFCM()">Start</button>
       <button onclick="pauseTM()">Pause</button>
       <button onclick="resetTM()">Reset</button>
     </div>
@@ -392,20 +392,33 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 const db = firebase.firestore();
 window.fcmToken = localStorage.getItem("fcmToken");
-
+const swRegPromise = navigator.serviceWorker.register("sw.js");
+  
 async function initFCM(){
   const permission = await Notification.requestPermission();
   if(permission !== "granted") return;
-
+  const registration = await swRegPromise;
   const token = await messaging.getToken({
-    vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK2O8CpDN74Z1PdXkVGuxNsHAuku8zZNo"
+    vapidKey: "BFoYUVSD5GJ4JbrHpppNPwVIvldNCrW5zZiKjmzh98Bbf-yEiwArRJsK2O8CpDN74Z1PdXkVGuxNsHAuku8zZNo",
+    serviceWorkerRegistration: registration
   });
+
+  if(!token){
+  console.error("FCM token not generated");
+  return;
+  }
 
   window.fcmToken = token;
   localStorage.setItem("fcmToken", token);
   console.log("FCM TOKEN:", token);
 }
-initFCM();
+async function startWithFCM(){
+  if(!window.fcmToken){
+    await initFCM();
+  }
+  startTM();
+}
+  
   let taskSelect, minInput, secInput, tmDisplay, ring;
   
 /* THEME */
@@ -716,11 +729,6 @@ function pad(n){
 
 updateSW();
 updateTM();
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js")
-    .then(() => console.log("SW registered"))
-    .catch(err => console.log("SW error", err));
-}
 </script>
 
 </body>
