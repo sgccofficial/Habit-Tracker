@@ -391,8 +391,7 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 const db = firebase.firestore();
-
-window.fcmToken = null;
+window.fcmToken = localStorage.getItem("fcmToken");
 
 async function initFCM(){
   const permission = await Notification.requestPermission();
@@ -403,6 +402,7 @@ async function initFCM(){
   });
 
   window.fcmToken = token;
+  localStorage.setItem("fcmToken", token);
   console.log("FCM TOKEN:", token);
 }
 initFCM();
