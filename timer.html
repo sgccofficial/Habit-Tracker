@@ -412,11 +412,12 @@ async function initFCM(){
   localStorage.setItem("fcmToken", token);
   console.log("FCM TOKEN:", token);
 }
-async function startWithFCM(){
-  if(!window.fcmToken){
-    await initFCM();
-  }
+function startWithFCM(){
   startTM();
+
+  if(Notification.permission !== "denied" && !window.fcmToken){
+    initFCM().catch(err => console.error("FCM error:", err));
+  }
 }
   
   let taskSelect, minInput, secInput, tmDisplay, ring;
