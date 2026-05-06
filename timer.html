@@ -543,8 +543,9 @@ if(window.fcmToken && endTime){
     task: taskName
   });
   }
-  tmi = setInterval(updateFromTime, 250);
-  updateFromTime();
+  left = total;
+updateTM();
+tmi = setInterval(updateFromTime, 250);
 }
 
 function updateFromTime(){
@@ -580,6 +581,7 @@ function updateFromTime(){
 }
 
 function updateTM(){
+  if(total <= 0) return;
   let m=Math.floor(left/60);
   let s=left%60;
   tmDisplay.innerText=`${pad(m)}:${pad(s)}`;
