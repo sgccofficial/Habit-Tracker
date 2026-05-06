@@ -85,7 +85,7 @@ messaging.onBackgroundMessage((payload) => {
       payload.notification?.body ||
       payload.data?.body ||
       "Session completed",
-    icon: "image-192.png",
+    icon: "image-512.png",
     tag: "timer-alert"
   };
 
