@@ -41,62 +41,106 @@ self.addEventListener("activate", event => {
           if (key !== CACHE_NAME) {
             return caches.delete(key);
           }
-        })
-      )
-    )
-  );
-  self.clients.claim();
+const CACHE_NAME = "habitflow-v1";
+
+const urlsToCache = [
+"./",
+"index.html",
+"journal.html",
+"timer.html",
+"manifest.json",
+"image-192.png",
+"image-512.png"
+];
+
+/* 🔥 FIREBASE */
+importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
+
+firebase.initializeApp({
+apiKey: "AIzaSyCwVUAnFNoEk5HUF2o_qf2hj83V4MhNcfg",
+authDomain: "hab-flow.firebaseapp.com",
+projectId: "hab-flow",
+messagingSenderId: "132980995414",
+appId: "1:132980995414:web:8e6fb46389cf0a384852f7"
+});
+
+const messaging = firebase.messaging();
+
+/* 🔥 INSTALL */
+self.addEventListener("install", event => {
+self.skipWaiting();
+event.waitUntil(
+caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+);
+});
+
+/* 🔥 ACTIVATE */
+self.addEventListener("activate", event => {
+event.waitUntil(
+caches.keys().then(keys =>
+Promise.all(
+keys.map(key => {
+if (key !== CACHE_NAME) {
+return caches.delete(key);
+}
+})
+)
+)
+);
+self.clients.claim();
 });
 
 /* 🔥 FETCH */
 self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
+event.respondWith(
+caches.match(event.request).then(cached => {
+if (cached) return cached;
 
-      return fetch(event.request).then(response => {
-        return caches.open("habitflow-runtime").then(cache => {
+return fetch(event.request).then(response => {    
+    return caches.open("habitflow-runtime").then(cache => {    
 
-          if (
-            event.request.method === "GET" &&
-            response.status === 200 &&
-            event.request.url.startsWith("http")
-          ) {
-            cache.put(event.request, response.clone());
-          }
+      if (    
+        event.request.method === "GET" &&    
+        response.status === 200 &&    
+        event.request.url.startsWith("http")    
+      ) {    
+        cache.put(event.request, response.clone());    
+      }    
 
-          return response;
-        });
-      });
-    })
-  );
+      return response;    
+    });    
+  });    
+})
+
+);
 });
 
-/* Background Notifications */
+/* 🔥 BACKGROUND NOTIFICATION */
 messaging.onBackgroundMessage((payload) => {
 
-  const title =
-    payload.notification?.title ||
-    payload.data?.title ||
-    "Time’s Up ⏰";
+const title =
+payload.notification?.title ||
+payload.data?.title ||
+"Time’s Up ⏰";
 
-  const options = {
-    body:
-      payload.notification?.body ||
-      payload.data?.body ||
-      "Session completed",
-    icon: "image-512.png",
-    tag: "timer-alert"
-  };
+const options = {
+body:
+payload.notification?.body ||
+payload.data?.body ||
+"Session completed",
+icon: "image-512.png",
+tag: "timer-alert"
+};
 
-  self.registration.showNotification(title, options);
+self.registration.showNotification(title, options);
 });
 
 /* 🔥 CLICK ACTION */
 self.addEventListener("notificationclick", event => {
-  event.notification.close();
+event.notification.close();
 
-  event.waitUntil(
-    clients.openWindow("timer.html")
-  );
+event.waitUntil(
+clients.openWindow("timer.html")
+);
 });
