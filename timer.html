@@ -426,16 +426,37 @@ async function initFCM(){
   }
   
 async function startWithFCM(){
+
   startTM();
-  if(!window.fcmToken){
-    try{
+
+  const taskName = taskSelect
+    ? taskSelect.options[taskSelect.selectedIndex].text
+    : "Session";
+
+  try{
+
+    if(!window.fcmToken){
       await initFCM();
-    }catch(err){
-      console.error("FCM init failed:", err);
-      return;
     }
+
+    if(window.fcmToken && endTime){
+
+      await db.collection("timers").add({
+        token: window.fcmToken,
+        endTime: endTime,
+        sent: false,
+        task: taskName
+      });
+
+      console.log("Timer doc created");
+    }
+
+  }catch(err){
+
+    console.error("FCM/Firestore failed:", err);
+
   }
-}
+    }
   
   let taskSelect, minInput, secInput, tmDisplay, ring;
   
@@ -549,15 +570,6 @@ function startTM(){
   updateTM();
   updateFromTime();
   tmi = setInterval(updateFromTime, 250);
-
-     if(window.fcmToken && endTime){
-  db.collection("timers").add({
-    token: window.fcmToken,
-    endTime: endTime,
-    sent: false,
-    task: taskName
-  });
-    }
   }
 }
 
