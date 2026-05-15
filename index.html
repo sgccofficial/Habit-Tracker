@@ -379,13 +379,22 @@ function toggleDark(){
     localStorage.setItem("dark", document.body.classList.contains("dark"));
 }
 
-function save(){ localStorage.setItem("habits", JSON.stringify(habits)); }
+function save(){
 
+  localStorage.setItem(
+    "habits",
+    JSON.stringify(habits)
+  );
+
+  syncHabitReminders();
+
+    }
 function format(d){ return d.toISOString().split("T")[0]; }
 
 function normalize(h){
   return {
     name:(h.name||"Habit").slice(0,25),
+    id: h.id || crypto.randomUUID(),
     dates:h.dates||[],
     created:h.created||format(new Date()),
     color:h.color||"#6a11cb",
@@ -700,7 +709,16 @@ if ("serviceWorker" in navigator) {
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+import {
+  getFirestore,
+  doc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getMessaging,
+  getToken,
+  onMessage
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCwVUAnFNoEk5HUF2o_qf2hj83V4MhNcfg",
@@ -711,6 +729,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const messaging = getMessaging(app);
 
 // ✅ Foreground messages
@@ -740,6 +759,8 @@ async function initPush() {
       });
 
       console.log("TOKEN:", token);
+      localStorage.setItem("fcmToken", token);
+      await syncHabitReminders();
     } else {
       console.log("Permission denied");
     }
@@ -749,6 +770,53 @@ async function initPush() {
 }
 
 initPush();
+  
+  async function syncHabitReminders(){
+const token =
+    localStorage.getItem("fcmToken");
+
+  if(!token) return;
+  const today =
+    new Date().toISOString().split("T")[0];
+
+  for(const habit of habits){
+    if(!habit.id){
+      habit.id = crypto.randomUUID();
+    }
+
+    await setDoc(
+
+      doc(db, "habitReminders", habit.id),
+
+      {
+
+        token: token,
+
+        habitName: habit.name,
+
+        reminderTime:
+          habit.reminderTime || "",
+
+        streak:
+          streak(habit.dates),
+
+        doneToday:
+          habit.dates.includes(today)
+
+      }
+
+    );
+
+  }
+localStorage.setItem(
+    "habits",
+    JSON.stringify(habits)
+  );
+  console.log("Habit reminders synced");
+
+  }
+  window.syncHabitReminders =
+  syncHabitReminders;
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
